@@ -1,4 +1,4 @@
-import sys
+import argparse
 import os
 from datetime import datetime
 
@@ -15,37 +15,34 @@ def create_file(filename: str, content: list[str]) -> None:
             file.write(f"{idx} {line}\n")
 
 
-def main() -> None:
-    if len(sys.argv) < 3:
-        return
-
-    flags = set(sys.argv[1:])
-    directory_path = ""
+def writing_content() -> list[str]:
+    print("Enter content line:")
     content = []
+    while True:
+        line = input()
+        if line.lower() == "stop":
+            break
+        content.append(line)
+    return content
 
-    if "-d" in flags:
-        try:
-            directory_index = sys.argv.index("-d") + 1
-            directory_path = os.path.join(*sys.argv[directory_index:])
-            create_directory(directory_path)
-        except IndexError:
-            print("No directory path")
-            return
 
-    if "-f" in flags:
-        try:
-            filename_index = sys.argv.index("-f") + 1
-            filename = sys.argv[filename_index]
-            print("Enter content line:")
-            while True:
-                line = input()
-                if line.lower() == "stop":
-                    break
-                content.append(line)
-            create_file(os.path.join(directory_path, filename), content)
-        except IndexError:
-            print("No file name")
-            return
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Create directory and file with content")
+    parser.add_argument("-d", "--directory",
+                        help="Directory path", required=True)
+    parser.add_argument("-f", "--filename",
+                        help="File name", required=True)
+    args = parser.parse_args()
+
+    directory_path = args.directory
+    filename = args.filename
+
+    create_directory(directory_path)
+
+    content = writing_content()
+
+    create_file(os.path.join(directory_path, filename), content)
 
 
 if __name__ == "__main__":
